@@ -12,7 +12,7 @@ NC='\033[0m'
 SOLANA_KEY_DEFAULT=""
 POP_VERSION="v0.2.5"
 DOWNLOAD_URL="https://dl.pipecdn.app/${POP_VERSION}/pop"
-AUTHORS="AJP | KrimDev"
+AUTHOR="KrimDev"
 DEFAULT_RAM=4
 DEFAULT_DISK=100
 DEFAULT_CACHE_DIR="/root/pipe/download_cache"  # Changed to /root/pipe
@@ -470,3 +470,40 @@ while true; do
                 sleep 2
                 clear
             else
+                echo -e "${RED}Node is not installed!${NC}"
+                sleep 2
+                clear
+            fi
+            ;;
+
+        6)
+            configure_node
+            sleep 2
+            clear
+            ;;
+
+        7)
+            if check_installation; then
+                uninstall_node
+                sleep 2
+                clear
+            else
+                echo -e "${RED}No node installation found!${NC}"
+                sleep 2
+                clear
+            fi
+            ;;
+
+        8)
+            clear
+            echo -e "${GREEN}Goodbye!${NC}"
+            exit 0
+            ;;
+
+        *)
+            echo -e "${RED}Invalid option!${NC}"
+            sleep 2
+            clear
+            ;;
+    esac
+done
