@@ -1,3 +1,8 @@
+## Authors
+
+KrimDev + AJPanda
+I am just adding some extra sauce to it!
+
 # Pipe DevNet 2 Node Manager
 
 A bash script to manage Pipe DevNet 2 nodes easily. This script provides a user-friendly interface to install, configure, and manage your Pipe node.
@@ -25,33 +30,23 @@ A bash script to manage Pipe DevNet 2 nodes easily. This script provides a user-
 
 ## Installation
 
-1. Download the script:
+1. Download the script make executable and run.
 ```bash
-wget https://raw.githubusercontent.com/krimdev/Pipe-DevNet-2-Node-Manager/main/pipe-manager.sh
-```
-
-2. Make it executable:
-```bash
-chmod +x pipe-manager.sh
-```
-
-3. Run the script:
-```bash
-./pipe-manager.sh
+wget https://raw.githubusercontent.com/0xAJPanda/Pipe-Network//main/pipe-manager.sh && chmod +x pipe-manager.sh && ./pipe-manager.sh
 ```
 
 ## Usage
 
 The script provides an interactive menu with the following options:
 
-1. Install/Start/Stop node
+1. Install
 2. Show status
 3. Generate referral code
-4. Backup node
+4. Backup node to your directory
 5. Update node
-6. Configure node
+6. Reconfigure node
 7. Uninstall node
-8. Exit
+8. Exit Script
 
 ### Initial Setup
 
@@ -83,7 +78,7 @@ sudo systemctl status pop.service
 
 View node logs using:
 ```bash
-sudo journalctl -u pop.service
+sudo journalctl -u pop.service  -f -n 10
 ```
 
 ### Backup
@@ -96,15 +91,11 @@ For issues with the script, please open an issue on GitHub.
 
 For Pipe Network related questions, visit:
 - [Dashboard](https://dashboard.pipenetwork.com/node-lookup)
-- [Official Documentation](https://docs.pipenetwork.com)
+- [Official Documentation](https://docs.pipe.network/)
 
 ## Contributing
 
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
-
-## Author
-
-Created by KrimDev
 
 ## License
 
