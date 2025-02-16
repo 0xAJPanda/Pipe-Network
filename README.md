@@ -149,8 +149,12 @@ Reinstalling the node may require removing `/root/pipe/node_info.json` and the `
 
 ## Support
 
-- For Pipe Network questions, refer to **Pipe Documentation**.
-- For issues with this installer script, open an issue or pull request on the relevant GitHub repository.
+For issues with the script, please open an issue on GitHub.
+
+For Pipe Network related questions, visit:
+
+- [Dashboard](https://dashboard.pipenetwork.com/node-lookup)
+- [Official Documentation](https://docs.pipenetwork.com)
 
 ---
 
