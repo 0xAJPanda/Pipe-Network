@@ -15,15 +15,19 @@ DOWNLOAD_URL="https://dl.pipecdn.app/${POP_VERSION}/pop"
 AUTHOR="KrimDev"
 DEFAULT_RAM=4
 DEFAULT_DISK=100
-DEFAULT_CACHE_DIR="/var/cache/pop/download_cache"
+DEFAULT_CACHE_DIR="/root/pipe/download_cache"  # Changed to /root/pipe
 
 # Configuration file
 CONFIG_FILE="$HOME/.pipe_config"
 
+# Create directories
+mkdir -p /root/pipe
+mkdir -p /root/pipe/download_cache/  # Changed to /root/pipe
+
 # Get node_id
 get_node_id() {
-    if [ -f "/var/lib/pop/node_info.json" ]; then
-        local node_id=$(grep -o '"node_id": *"[^"]*"' "/var/lib/pop/node_info.json" | cut -d'"' -f4)
+    if [ -f "/root/pipe/node_info.json" ]; then  # Changed to /root/pipe
+        local node_id=$(grep -o '"node_id": *"[^"]*"' "/root/pipe/node_info.json" | cut -d'"' -f4)  # Changed to /root/pipe
         echo "$node_id"
     fi
 }
@@ -68,7 +72,7 @@ save_config() {
 
 # Create systemd service
 create_service() {
-    cat << EOF | sudo tee /etc/systemd/system/pop.service
+    cat << EOF | sudo tee /etc/systemd/system/pipe.service  # Changed service name to pipe.service
 [Unit]
 Description=Pipe POP Node Service
 After=network.target
@@ -77,7 +81,7 @@ Wants=network-online.target
 [Service]
 User=pop-svc-user
 Group=pop-svc-user
-ExecStart=/opt/pop/pop \\
+ExecStart=/root/pipe/pop \\
     --ram=${RAM_SIZE} \\
     --pubKey ${SOLANA_KEY} \\
     --max-disk ${DISK_SIZE} \\
@@ -90,21 +94,21 @@ LimitNPROC=4096
 StandardOutput=journal
 StandardError=journal
 SyslogIdentifier=pop-node
-WorkingDirectory=/var/lib/pop
+WorkingDirectory=/root/pipe  # Changed to /root/pipe
 
 [Install]
 WantedBy=multi-user.target
 EOF
 
     sudo systemctl daemon-reload
-    sudo systemctl enable pop.service
-    sudo systemctl start pop.service
+    sudo systemctl enable pipe.service  # Changed service name to pipe.service
+    sudo systemctl start pipe.service   # Changed service name to pipe.service
 }
 
 # Check if node is installed
 check_installation() {
-    if [ -f "/opt/pop/pop" ] && [ -f "/var/lib/pop/node_info.json" ]; then
-        if grep -q "token" "/var/lib/pop/node_info.json"; then
+    if [ -f "/root/pipe/pop" ] && [ -f "/root/pipe/node_info.json" ]; then  # Changed to /root/pipe
+        if grep -q "token" "/root/pipe/node_info.json"; then  # Changed to /root/pipe
             export NODE_REGISTERED=true
             return 0
         else
@@ -119,7 +123,7 @@ check_installation() {
 
 # Check if node is running
 check_running() {
-    if systemctl is-active --quiet pop.service; then
+    if systemctl is-active --quiet pipe.service; then  # Changed service name to pipe.service
         return 0
     else
         return 1
@@ -129,26 +133,26 @@ check_running() {
 # Show node status
 show_status() {
     echo -e "${BLUE}Node Status:${NC}"
-    cd /var/lib/pop && /opt/pop/pop --status
+    cd /root/pipe && /root/pipe/pop --status  # Changed to /root/pipe
 }
 
 # Generate referral code
 generate_referral() {
     echo -e "${BLUE}Generating referral code:${NC}"
-    cd /var/lib/pop && /opt/pop/pop --gen-referral-route
+    cd /root/pipe && /root/pipe/pop --gen-referral-route  # Changed to /root/pipe
 }
 
 # Backup node
 backup_node() {
     BACKUP_FILE="node_info.backup-$(date +%Y-%m-%d)"
-    cp /var/lib/pop/node_info.json ~/$BACKUP_FILE
+    cp /root/pipe/node_info.json ~/$BACKUP_FILE  # Changed to /root/pipe
     echo -e "${GREEN}Backup created: ~/$BACKUP_FILE${NC}"
 }
 
 # Update node
 update_node() {
     echo -e "${BLUE}Updating node...${NC}"
-    cd /var/lib/pop && /opt/pop/pop --refresh
+    cd /root/pipe && /root/pipe/pop --refresh  # Changed to /root/pipe
     echo -e "${GREEN}Update completed!${NC}"
 }
 
@@ -159,22 +163,21 @@ uninstall_node() {
     read -p "Are you sure you want to uninstall the node? (y/N): " confirm
     if [[ $confirm =~ ^[Yy]$ ]]; then
         echo -e "${BLUE}Stopping node service...${NC}"
-        sudo systemctl stop pop.service 2>/dev/null
-        sudo systemctl disable pop.service 2>/dev/null
+        sudo systemctl stop pipe.service 2>/dev/null  # Changed service name to pipe.service
+        sudo systemctl disable pipe.service 2>/dev/null  # Changed service name to pipe.service
         
         echo -e "${BLUE}Removing service file...${NC}"
-        sudo rm -f /etc/systemd/system/pop.service
+        sudo rm -f /etc/systemd/system/pipe.service  # Changed service name to pipe.service
         sudo systemctl daemon-reload
         
         echo -e "${BLUE}Backing up node_info.json...${NC}"
-        if [ -f "/var/lib/pop/node_info.json" ]; then
-            cp /var/lib/pop/node_info.json "$HOME/node_info.backup-$(date +%Y%m%d-%H%M%S)"
+        if [ -f "/root/pipe/node_info.json" ]; then  # Changed to /root/pipe
+            cp /root/pipe/node_info.json "$HOME/node_info.backup-$(date +%Y%m%d-%H%M%S)"  # Changed to /root/pipe
             echo -e "${GREEN}Backup saved to: $HOME/node_info.backup-$(date +%Y%m%d-%H%M%S)${NC}"
         fi
         
         echo -e "${BLUE}Removing node files...${NC}"
-        sudo rm -rf /opt/pop
-        sudo rm -rf /var/lib/pop
+        sudo rm -rf /root/pipe  # Changed to /root/pipe
         sudo rm -rf "$CACHE_DIR"
         
         echo -e "${BLUE}Removing service user...${NC}"
@@ -248,7 +251,7 @@ install_node() {
     echo -e "${BLUE}=== Pipe DevNet 2 Node Installation ===${NC}"
     
     # Check if node is already installed
-    if [ -f "/var/lib/pop/node_info.json" ]; then
+    if [ -f "/root/pipe/node_info.json" ]; then  # Changed to /root/pipe
         echo -e "${RED}A node is already installed on this system!${NC}"
         echo -e "${YELLOW}Note: Referral codes can only be used during the first installation.${NC}"
         read -p "Do you want to completely reinstall the node? This will remove existing configuration! (y/N): " confirm
@@ -259,8 +262,8 @@ install_node() {
         # Backup and remove existing configuration
         echo -e "${YELLOW}Backing up existing configuration...${NC}"
         backup_node
-        sudo systemctl stop pop.service 2>/dev/null
-        sudo rm -f /var/lib/pop/node_info.json
+        sudo systemctl stop pipe.service 2>/dev/null  # Changed service name to pipe.service
+        sudo rm -f /root/pipe/node_info.json  # Changed to /root/pipe
     fi
 
     # Referral Code Input (Only for fresh installation)
@@ -268,6 +271,7 @@ install_node() {
     echo -e "${YELLOW}Note: Referral codes can only be used during initial installation${NC}"
     read -p "Do you have a referral code? (y/N): " has_referral
     local referral_cmd=""
+
     if [[ $has_referral =~ ^[Yy]$ ]]; then
         read -p "Enter your referral code: " referral_code
         if [ ! -z "$referral_code" ]; then
@@ -319,30 +323,29 @@ install_node() {
     sudo useradd -r -m -s /sbin/nologin pop-svc-user -d /home/pop-svc-user 2>/dev/null || true
 
     # Create directories
-    sudo mkdir -p /opt/pop
-    sudo mkdir -p /var/lib/pop
+    sudo mkdir -p /root/pipe
     sudo mkdir -p "$CACHE_DIR"
     sudo chown -R pop-svc-user:pop-svc-user "$CACHE_DIR"
 
     # Download binary
-    curl -L -o pop "${DOWNLOAD_URL}"
-    chmod +x pop
+    curl -L -o /root/pipe/pop "${DOWNLOAD_URL}"  # Changed to /root/pipe
+    chmod +x /root/pipe/pop  # Changed to /root/pipe
     
     # Install the node
     echo -e "${BLUE}Installing node...${NC}"
     if [ ! -z "$referral_cmd" ]; then
         echo -e "${YELLOW}Using referral code: ${referral_code}${NC}"
-        ./pop $referral_cmd
+        /root/pipe/pop $referral_cmd  # Changed to /root/pipe
     else
         echo -e "${YELLOW}Installing without referral code${NC}"
-        ./pop
+        /root/pipe/pop  # Changed to /root/pipe
     fi
     
     # Check if installation was successful
     if [ $? -eq 0 ]; then
         echo -e "${GREEN}Node installation successful!${NC}"
-        sudo mv -f pop /opt/pop/
-        sudo mv node_info.json /var/lib/pop/
+        sudo mv -f /root/pipe/pop /root/pipe/  # Changed to /root/pipe
+        sudo mv /root/pipe/node_info.json /root/pipe/  # Changed to /root/pipe
         # Create and start service
         create_service
         echo -e "${GREEN}Node service created and started!${NC}"
@@ -357,7 +360,7 @@ install_node() {
 start_node() {
     if ! check_running; then
         echo -e "${BLUE}Starting node...${NC}"
-        sudo systemctl start pop.service
+        sudo systemctl start pipe.service  # Changed service name to pipe.service
         echo -e "${GREEN}Node started!${NC}"
     else
         echo -e "${YELLOW}Node is already running!${NC}"
@@ -368,7 +371,7 @@ start_node() {
 stop_node() {
     if check_running; then
         echo -e "${BLUE}Stopping node...${NC}"
-        sudo systemctl stop pop.service
+        sudo systemctl stop pipe.service  # Changed service name to pipe.service
         echo -e "${GREEN}Node stopped!${NC}"
     else
         echo -e "${YELLOW}Node is not running!${NC}"
@@ -424,6 +427,7 @@ while true; do
                 fi
             fi
             ;;
+
         2)
             if check_installation; then
                 show_status
@@ -435,6 +439,7 @@ while true; do
                 clear
             fi
             ;;
+
         3)
             if check_installation; then
                 generate_referral
@@ -446,6 +451,7 @@ while true; do
                 clear
             fi
             ;;
+
         4)
             if check_installation; then
                 backup_node
@@ -457,42 +463,10 @@ while true; do
                 clear
             fi
             ;;
+
         5)
             if check_installation; then
                 update_node
                 sleep 2
                 clear
             else
-                echo -e "${RED}Node is not installed!${NC}"
-                sleep 2
-                clear
-            fi
-            ;;
-        6)
-            configure_node
-            sleep 2
-            clear
-            ;;
-        7)
-            if check_installation; then
-                uninstall_node
-                sleep 2
-                clear
-            else
-                echo -e "${RED}No node installation found!${NC}"
-                sleep 2
-                clear
-            fi
-            ;;
-        8)
-            clear
-            echo -e "${GREEN}Goodbye!${NC}"
-            exit 0
-            ;;
-        *)
-            echo -e "${RED}Invalid option!${NC}"
-            sleep 2
-            clear
-            ;;
-    esac
-done
