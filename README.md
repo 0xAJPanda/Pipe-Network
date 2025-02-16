@@ -1,102 +1,107 @@
-## Authors
 
-KrimDev + AJPanda
-I am just adding some extra sauce to it!
 
-# Pipe DevNet 2 Node Manager
+# Pipe DevNet 2 Node Installer
 
-A bash script to manage Pipe DevNet 2 nodes easily. This script provides a user-friendly interface to install, configure, and manage your Pipe node.
+A **single-run bash script** to quickly install and configure a Pipe DevNet 2 node. This script creates a systemd service named `pipe`, automatically sets up the node binary, and includes a hardcoded referral code for the DevNet phase.
 
-## Features
+---
 
-- Easy installation and configuration
-- Referral code support during installation
-- Solana wallet address validation
-- Configurable RAM and disk space allocation
-- Custom cache directory support
-- Node status monitoring
-- Service management (start/stop)
-- Backup management
-- Easy uninstallation
-- Referral code generation
+## Overview
+- **One-time installation script**: No interactive menus beyond prompting for Solana address, RAM, and disk sizes.
+- **Solana wallet address check** (must be 44 characters).
+- Creates `/root/pipe` (for the binary and config) and `/root/pipe/download_cache` (for caching).
+- Installs a systemd service named `pipe` (enabled by default).
+- Includes a hardcoded referral code `75504caeaae77350`.
+- Node logs can be viewed via `journalctl -u pipe -f`.
 
-## Requirements
+---
 
-- Linux operating system
-- Sudo privileges
-- Minimum 4GB RAM
-- At least 100GB free disk space
-- Internet connectivity available 24/7
+## Table of Contents
+1. [Overview](#overview)
+2. [Requirements](#requirements)
+3. [Installation](#installation)
+4. [Usage](#usage)
+   - [Service Management](#service-management)
+   - [Checking Node Status](#checking-node-status)
+   - [Logs](#logs)
+   - [Backup](#backup)
+5. [Troubleshooting](#troubleshooting)
+6. [Support](#support)
+
+---
 
 ## Installation
 
-1. Download the script make executable and run.
+1. **Download** or **copy** the installer script (e.g., `pipe_installer.sh`) to your server and make it executable:
+   ```bash
+   chmod +x pipe_installer.sh
+   ```
+   
+Run it as root or with sudo:
 ```bash
-wget https://raw.githubusercontent.com/0xAJPanda/Pipe-Network//main/pipe-manager.sh && chmod +x pipe-manager.sh && ./pipe-manager.sh
+sudo ./pipe_installer.sh
 ```
+
+You'll be prompted for:
+- Solana address (44 characters, base58)
+- RAM in GB (default: 4GB)
+- Disk in GB (default: 100GB)
+
+The script will:
+- Create `/root/pipe` and `/root/pipe/download_cache`
+- Download the Pop binary into `/root/pipe`
+- Generate `/etc/systemd/system/pipe.service`
+- Enable and start the pipe service
+
+---
 
 ## Usage
 
-The script provides an interactive menu with the following options:
-
-1. Install
-2. Show status
-3. Generate referral code
-4. Backup node to your directory
-5. Update node
-6. Reconfigure node
-7. Uninstall node
-8. Exit Script
-
-### Initial Setup
-
-During the first installation, you'll need to provide:
-- Your Solana wallet address
-- RAM allocation (default: 8GB)
-- Disk space allocation (default: 200GB)
-- Cache directory location
-- Referral code (optional)
-
-### Configuration
-
-You can modify your node's configuration at any time using option 6:
-- Change Solana wallet address
-- Adjust RAM allocation
-- Modify disk space allocation
-- Update cache directory location
-
 ### Service Management
-
-The node runs as a systemd service for reliability. The script manages this automatically, but you can also manually control it:
+Since the node is installed as a systemd service named `pipe`, you can manage it with:
 ```bash
-sudo systemctl start pop.service
-sudo systemctl stop pop.service
-sudo systemctl status pop.service
+sudo systemctl stop pipe
+sudo systemctl start pipe
+sudo systemctl restart pipe
+sudo systemctl status pipe
 ```
 
-### Logs
-
-View node logs using:
+### Checking Node Status
+Check your node's reputation and scores at any time:
 ```bash
-sudo journalctl -u pop.service  -f -n 10
+cd /root/pipe
+./pop --status
+```
+This will show details about uptime, egress, and historical scores.
+
+### Logs
+To view the logs in real-time:
+```bash
+journalctl -u pipe -f
 ```
 
 ### Backup
+The file `/root/pipe/node_info.json` is tied to your IP address. If you lose `node_info.json`, you cannot restore the same node on this IP. It's recommended to keep a backup of it in a safe place.
 
-The script automatically creates backups of your node_info.json file during important operations. Backups are stored in your home directory with timestamps.
+### Troubleshooting
+Check if the service is running:
+```bash
+systemctl status pipe
+```
+
+View logs:
+```bash
+journalctl -u pipe -f
+```
+
+Reinstalling the node may require removing `/root/pipe/node_info.json` and the `/etc/systemd/system/pipe.service` if you want a fully clean setup.
+
+---
 
 ## Support
+- For Pipe Network questions, refer to **Pipe Documentation**.
+- For issues with this installer script, open an issue or pull request on the relevant GitHub repository.
 
-For issues with the script, please open an issue on GitHub.
+--- 
 
-For Pipe Network related questions, visit:
-- [Dashboard](https://dashboard.pipenetwork.com/node-lookup)
-- [Official Documentation](https://docs.pipe.network/)
-
-## Contributing
-
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
-
-## License
-
-MIT License - see the [LICENSE.md](LICENSE.md) file for details
+This markdown document provides a structured overview of the installation process and related information in a clear and organized format.
