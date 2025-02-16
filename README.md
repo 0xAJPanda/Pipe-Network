@@ -11,7 +11,6 @@ A **single-run bash script** to quickly install and configure a Pipe DevNet 2 no
 - **Solana wallet address check** (must be 44 characters).
 - Creates `/root/pipe` (for the binary and config) and `/root/pipe/download_cache` (for caching).
 - Installs a systemd service named `pipe` (enabled by default).
-- Includes a hardcoded referral code `75504caeaae77350`.
 - Node logs can be viewed via `journalctl -u pipe -f`.
 
 ---
