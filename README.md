@@ -11,6 +11,7 @@ A **single-run bash script** to quickly install and configure a Pipe DevNet 2 no
 - Creates `/root/pipe` (for the binary and config) and `/root/pipe/download_cache` (for caching).
 - Installs a systemd service named `pipe` (enabled by default).
 - Node logs can be viewed via `journalctl -u pipe -f`.
+- During the install feel free to use my ref code : 6e458aff4833b08d
 
 ---
 
@@ -32,14 +33,19 @@ A **single-run bash script** to quickly install and configure a Pipe DevNet 2 no
 ## Installation
 
 1. **Download** or **copy** the installer script (e.g., `pipe_installer.sh`) to your server and make it executable:
-   ```bash
-   chmod +x pipe_installer.sh
-   ```
+
+```bash
+   git clone https://github.com/0xAJPanda/Pipe-Network.git
+```
+
+```bash
+cd Pipe-Network && chmod +x pipe-manager.sh
+```
 
 Run it as root or with sudo:
 
 ```bash
-sudo ./pipe_installer.sh
+sudo ./pipe_manager.sh
 ```
 
 You'll be prompted for:
@@ -58,6 +64,36 @@ The script will:
 ---
 
 ## Usage
+
+The script provides an interactive menu with the following options:
+
+1. Install/Start/Stop node
+2. Show status
+3. Generate referral code
+4. Backup node
+5. Update node
+6. Configure node
+7. Uninstall node
+8. Exit
+
+### Initial Setup
+
+During the first installation, you'll need to provide:
+
+- Your Solana wallet address
+- RAM allocation (default: 8GB)
+- Disk space allocation (default: 200GB)
+- Cache directory location
+- Referral code (optional)
+
+### Configuration
+
+You can modify your node's configuration at any time using option 6:
+
+- Change Solana wallet address
+- Adjust RAM allocation
+- Modify disk space allocation
+- Update cache directory location
 
 ### Service Management
 
@@ -86,7 +122,7 @@ This will show details about uptime, egress, and historical scores.
 To view the logs in real-time:
 
 ```bash
-journalctl -u pipe -f
+journalctl -u pipe -f -n 10
 ```
 
 ### Backup

@@ -12,22 +12,23 @@ NC='\033[0m'
 SOLANA_KEY_DEFAULT=""
 POP_VERSION="v0.2.5"
 DOWNLOAD_URL="https://dl.pipecdn.app/${POP_VERSION}/pop"
-AUTHOR="KrimDev"
+AUTHOR="AJPanda + KrimDev"
 DEFAULT_RAM=4
 DEFAULT_DISK=100
-DEFAULT_CACHE_DIR="/root/pipe/download_cache"  # Changed to /root/pipe
+DEFAULT_CACHE_DIR="$HOME/pipe/download_cache"  # Changed to current user's home directory
+DEFAULT_REFERRAL_CODE="6e458aff4833b08d"  # Default referral code
 
 # Configuration file
 CONFIG_FILE="$HOME/.pipe_config"
 
 # Create directories
-mkdir -p /root/pipe
-mkdir -p /root/pipe/download_cache/  # Changed to /root/pipe
+mkdir -p "$HOME/pipe"
+mkdir -p "$HOME/pipe/download_cache/"  # Changed to current user's home directory
 
 # Get node_id
 get_node_id() {
-    if [ -f "/root/pipe/node_info.json" ]; then  # Changed to /root/pipe
-        local node_id=$(grep -o '"node_id": *"[^"]*"' "/root/pipe/node_info.json" | cut -d'"' -f4)  # Changed to /root/pipe
+    if [ -f "$HOME/pipe/node_info.json" ]; then  # Changed to current user's home directory
+        local node_id=$(grep -o '"node_id": *"[^"]*"' "$HOME/pipe/node_info.json" | cut -d'"' -f4)  # Changed to current user's home directory
         echo "$node_id"
     fi
 }
@@ -58,6 +59,7 @@ load_config() {
         DISK_SIZE=$DEFAULT_DISK
         CACHE_DIR=$DEFAULT_CACHE_DIR
         SOLANA_KEY=$SOLANA_KEY_DEFAULT
+        referral_code=$DEFAULT_REFERRAL_CODE  # Set the default referral code
         save_config
     fi
 }
@@ -68,6 +70,7 @@ save_config() {
     echo "DISK_SIZE=$DISK_SIZE" >> "$CONFIG_FILE"
     echo "CACHE_DIR=$CACHE_DIR" >> "$CONFIG_FILE"
     echo "SOLANA_KEY=$SOLANA_KEY" >> "$CONFIG_FILE"
+    echo "referral_code=$referral_code" >> "$CONFIG_FILE"
 }
 
 # Create systemd service
@@ -79,9 +82,8 @@ After=network.target
 Wants=network-online.target
 
 [Service]
-User=pop-svc-user
-Group=pop-svc-user
-ExecStart=/root/pipe/pop \\
+User=$USER  # Set the user to the current user
+ExecStart=$HOME/pipe/pop \\
     --ram=${RAM_SIZE} \\
     --pubKey ${SOLANA_KEY} \\
     --max-disk ${DISK_SIZE} \\
@@ -94,7 +96,7 @@ LimitNPROC=4096
 StandardOutput=journal
 StandardError=journal
 SyslogIdentifier=pop-node
-WorkingDirectory=/root/pipe  # Changed to /root/pipe
+WorkingDirectory=$HOME/pipe  # Set the working directory to the current user's home directory
 
 [Install]
 WantedBy=multi-user.target
@@ -107,8 +109,8 @@ EOF
 
 # Check if node is installed
 check_installation() {
-    if [ -f "/root/pipe/pop" ] && [ -f "/root/pipe/node_info.json" ]; then  # Changed to /root/pipe
-        if grep -q "token" "/root/pipe/node_info.json"; then  # Changed to /root/pipe
+    if [ -f "$HOME/pipe/pop" ] && [ -f "$HOME/pipe/node_info.json" ]; then  # Changed to current user's home directory
+        if grep -q "token" "$HOME/pipe/node_info.json"; then  # Changed to current user's home directory
             export NODE_REGISTERED=true
             return 0
         else
@@ -133,26 +135,26 @@ check_running() {
 # Show node status
 show_status() {
     echo -e "${BLUE}Node Status:${NC}"
-    cd /root/pipe && /root/pipe/pop --status  # Changed to /root/pipe
+    cd $HOME/pipe && $HOME/pipe/pop --status  # Changed to current user's home directory
 }
 
 # Generate referral code
 generate_referral() {
     echo -e "${BLUE}Generating referral code:${NC}"
-    cd /root/pipe && /root/pipe/pop --gen-referral-route  # Changed to /root/pipe
+    cd $HOME/pipe && $HOME/pipe/pop --gen-referral-route  # Changed to current user's home directory
 }
 
 # Backup node
 backup_node() {
     BACKUP_FILE="node_info.backup-$(date +%Y-%m-%d)"
-    cp /root/pipe/node_info.json ~/$BACKUP_FILE  # Changed to /root/pipe
+    cp $HOME/pipe/node_info.json ~/$BACKUP_FILE  # Changed to current user's home directory
     echo -e "${GREEN}Backup created: ~/$BACKUP_FILE${NC}"
 }
 
 # Update node
 update_node() {
     echo -e "${BLUE}Updating node...${NC}"
-    cd /root/pipe && /root/pipe/pop --refresh  # Changed to /root/pipe
+    cd $HOME/pipe && $HOME/pipe/pop --refresh  # Changed to current user's home directory
     echo -e "${GREEN}Update completed!${NC}"
 }
 
@@ -171,17 +173,17 @@ uninstall_node() {
         sudo systemctl daemon-reload
         
         echo -e "${BLUE}Backing up node_info.json...${NC}"
-        if [ -f "/root/pipe/node_info.json" ]; then  # Changed to /root/pipe
-            cp /root/pipe/node_info.json "$HOME/node_info.backup-$(date +%Y%m%d-%H%M%S)"  # Changed to /root/pipe
+        if [ -f "$HOME/pipe/node_info.json" ]; then  # Changed to current user's home directory
+            cp $HOME/pipe/node_info.json "$HOME/node_info.backup-$(date +%Y%m%d-%H%M%S)"  # Changed to current user's home directory
             echo -e "${GREEN}Backup saved to: $HOME/node_info.backup-$(date +%Y%m%d-%H%M%S)${NC}"
         fi
         
         echo -e "${BLUE}Removing node files...${NC}"
-        sudo rm -rf /root/pipe  # Changed to /root/pipe
+        sudo rm -rf $HOME/pipe  # Changed to current user's home directory
         sudo rm -rf "$CACHE_DIR"
         
-        echo -e "${BLUE}Removing service user...${NC}"
-        sudo userdel -r pop-svc-user 2>/dev/null
+        #echo -e "${BLUE}Removing service user...${NC}"
+        #sudo userdel -r pop-svc-user 2>/dev/null
         
         echo -e "${GREEN}Node uninstalled successfully!${NC}"
         echo -e "${YELLOW}Note: Configuration backup has been saved in your home directory${NC}"
@@ -197,6 +199,7 @@ configure_node() {
     echo -e "RAM Size: ${YELLOW}${RAM_SIZE}GB${NC}"
     echo -e "Disk Size: ${YELLOW}${DISK_SIZE}GB${NC}"
     echo -e "Cache Directory: ${YELLOW}${CACHE_DIR}${NC}"
+    echo -e "Referral Code: ${YELLOW}${referral_code}${NC}"
     echo
     
     local new_solana=""
@@ -222,6 +225,7 @@ configure_node() {
     read -p "Enter new RAM size in GB (or press Enter to keep current): " new_ram
     read -p "Enter new disk size in GB (or press Enter to keep current): " new_disk
     read -p "Enter new cache directory path (or press Enter to keep current): " new_cache
+    read -p "Enter new referral code (or press Enter to keep current): " new_referral_code
 
     if [ ! -z "$new_ram" ]; then
         RAM_SIZE=$new_ram
@@ -232,7 +236,10 @@ configure_node() {
     if [ ! -z "$new_cache" ]; then
         sudo mkdir -p "$new_cache"
         CACHE_DIR=$new_cache
-        sudo chown -R pop-svc-user:pop-svc-user "$CACHE_DIR"
+        #sudo chown -R pop-svc-user:pop-svc-user "$CACHE_DIR"
+    fi
+    if [ ! -z "$new_referral_code" ]; then
+        referral_code=$new_referral_code
     fi
 
     save_config
@@ -248,10 +255,10 @@ configure_node() {
 
 # Install node function
 install_node() {
-    echo -e "${BLUE}=== Pipe DevNet 2 Node Installation ===${NC}"
+    echo -e "${BLUE}=== Pipe Network Node Installation ===${NC}"
     
     # Check if node is already installed
-    if [ -f "/root/pipe/node_info.json" ]; then  # Changed to /root/pipe
+    if [ -f "$HOME/pipe/node_info.json" ]; then  # Changed to current user's home directory
         echo -e "${RED}A node is already installed on this system!${NC}"
         echo -e "${YELLOW}Note: Referral codes can only be used during the first installation.${NC}"
         read -p "Do you want to completely reinstall the node? This will remove existing configuration! (y/N): " confirm
@@ -263,7 +270,7 @@ install_node() {
         echo -e "${YELLOW}Backing up existing configuration...${NC}"
         backup_node
         sudo systemctl stop pipe.service 2>/dev/null  # Changed service name to pipe.service
-        sudo rm -f /root/pipe/node_info.json  # Changed to /root/pipe
+        sudo rm -f $HOME/pipe/node_info.json  # Changed to current user's home directory
     fi
 
     # Referral Code Input (Only for fresh installation)
@@ -278,6 +285,8 @@ install_node() {
             referral_cmd="--signup-by-referral-route $referral_code"
             echo -e "${GREEN}Referral code will be used during installation${NC}\n"
         fi
+    else
+        referral_code=$DEFAULT_REFERRAL_CODE  # Set to default referral code if none provided
     fi
 
     # Solana Wallet Configuration
@@ -320,32 +329,32 @@ install_node() {
     save_config
     
     # Create service user
-    sudo useradd -r -m -s /sbin/nologin pop-svc-user -d /home/pop-svc-user 2>/dev/null || true
+    #sudo useradd -r -m -s /sbin/nologin pop-svc-user -d /home/pop-svc-user 2>/dev/null || true
 
     # Create directories
-    sudo mkdir -p /root/pipe
+    sudo mkdir -p $HOME/pipe
     sudo mkdir -p "$CACHE_DIR"
-    sudo chown -R pop-svc-user:pop-svc-user "$CACHE_DIR"
+    #sudo chown -R pop-svc-user:pop-svc-user "$CACHE_DIR"
 
     # Download binary
-    curl -L -o /root/pipe/pop "${DOWNLOAD_URL}"  # Changed to /root/pipe
-    chmod +x /root/pipe/pop  # Changed to /root/pipe
+    curl -L -o $HOME/pipe/pop "${DOWNLOAD_URL}"  # Changed to current user's home directory
+    chmod +x $HOME/pipe/pop  # Changed to current user's home directory
     
     # Install the node
     echo -e "${BLUE}Installing node...${NC}"
     if [ ! -z "$referral_cmd" ]; then
         echo -e "${YELLOW}Using referral code: ${referral_code}${NC}"
-        /root/pipe/pop $referral_cmd  # Changed to /root/pipe
+        $HOME/pipe/pop $referral_cmd  # Changed to current user's home directory
     else
         echo -e "${YELLOW}Installing without referral code${NC}"
-        /root/pipe/pop  # Changed to /root/pipe
+        $HOME/pipe/pop  # Changed to current user's home directory
     fi
     
     # Check if installation was successful
     if [ $? -eq 0 ]; then
         echo -e "${GREEN}Node installation successful!${NC}"
-        sudo mv -f /root/pipe/pop /root/pipe/  # Changed to /root/pipe
-        sudo mv /root/pipe/node_info.json /root/pipe/  # Changed to /root/pipe
+        sudo mv -f $HOME/pipe/pop $HOME/pipe/  # Changed to current user's home directory
+        sudo mv $HOME/pipe/node_info.json $HOME/pipe/  # Changed to current user's home directory
         # Create and start service
         create_service
         echo -e "${GREEN}Node service created and started!${NC}"
@@ -383,7 +392,7 @@ load_config
 
 # Main menu
 while true; do
-    echo -e "\n${BLUE}=== Pipe DevNet 2 Node Manager by ${AUTHOR} ===${NC}"
+    echo -e "\n${BLUE}=== Pipe Network DevNet 2 Node Manager by ${AUTHOR} ===${NC}"
     echo -e "${BLUE}Current configuration: ${YELLOW}${RAM_SIZE}GB RAM, ${DISK_SIZE}GB Disk${NC}"
     echo -e "${BLUE}Cache directory: ${YELLOW}${CACHE_DIR}${NC}"
     echo -e "${BLUE}Status: ${NC}$(check_installation && echo -e "${GREEN}Installed${NC}" || echo -e "${RED}Not Installed${NC}"), $(check_running && echo -e "${GREEN}Running${NC}" || echo -e "${RED}Stopped${NC}")"
