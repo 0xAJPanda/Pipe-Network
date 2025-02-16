@@ -16,7 +16,7 @@ AUTHOR="AJPanda + KrimDev"
 DEFAULT_RAM=4
 DEFAULT_DISK=100
 DEFAULT_CACHE_DIR="$HOME/pipe/download_cache"  # Changed to current user's home directory
-DEFAULT_REFERRAL_CODE="6e458aff4833b08d"  # Default referral code
+DEFAULT_REFERRAL_CODE=""  # Default referral code
 
 # Configuration file
 CONFIG_FILE="$HOME/.pipe_config"
@@ -95,7 +95,7 @@ LimitNOFILE=65536
 LimitNPROC=4096
 StandardOutput=journal
 StandardError=journal
-SyslogIdentifier=pop-node
+SyslogIdentifier=pipe-node
 WorkingDirectory=$HOME/pipe  # Set the working directory to the current user's home directory
 
 [Install]
@@ -182,8 +182,7 @@ uninstall_node() {
         sudo rm -rf $HOME/pipe  # Changed to current user's home directory
         sudo rm -rf "$CACHE_DIR"
         
-        #echo -e "${BLUE}Removing service user...${NC}"
-        #sudo userdel -r pop-svc-user 2>/dev/null
+
         
         echo -e "${GREEN}Node uninstalled successfully!${NC}"
         echo -e "${YELLOW}Note: Configuration backup has been saved in your home directory${NC}"
@@ -236,7 +235,7 @@ configure_node() {
     if [ ! -z "$new_cache" ]; then
         sudo mkdir -p "$new_cache"
         CACHE_DIR=$new_cache
-        #sudo chown -R pop-svc-user:pop-svc-user "$CACHE_DIR"
+
     fi
     if [ ! -z "$new_referral_code" ]; then
         referral_code=$new_referral_code

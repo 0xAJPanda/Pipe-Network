@@ -11,7 +11,6 @@ A **single-run bash script** to quickly install and configure a Pipe DevNet 2 no
 - Creates `/root/pipe` (for the binary and config) and `/root/pipe/download_cache` (for caching).
 - Installs a systemd service named `pipe` (enabled by default).
 - Node logs can be viewed via `journalctl -u pipe -f`.
-- During the install feel free to use my ref code : 6e458aff4833b08d
 
 ---
 
