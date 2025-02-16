@@ -45,7 +45,7 @@ cd Pipe-Network && chmod +x pipe-manager.sh
 Run it as root or with sudo:
 
 ```bash
-sudo ./pipe_manager.sh
+sudo ./pipe-manager.sh
 ```
 
 You'll be prompted for:
