@@ -82,7 +82,7 @@ After=network.target
 Wants=network-online.target
 
 [Service]
-User=$USER  # Set the user to the current user
+User=$(whoami)
 ExecStart=$HOME/pipe/pop \\
     --ram=${RAM_SIZE} \\
     --pubKey ${SOLANA_KEY} \\
@@ -96,7 +96,7 @@ LimitNPROC=4096
 StandardOutput=journal
 StandardError=journal
 SyslogIdentifier=pipe-node
-WorkingDirectory=$HOME/pipe  # Set the working directory to the current user's home directory
+WorkingDirectory=$HOME/pipe
 
 [Install]
 WantedBy=multi-user.target

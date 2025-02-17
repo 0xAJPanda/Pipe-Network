@@ -1,0 +1,28 @@
+services:
+  pipe-node:
+    container_name: pipe-node
+    build: .
+    environment:
+      - SOLANA_WALLET=${SOLANA_WALLET}
+      - RAM_SIZE=${RAM_SIZE}
+      - DISK_SIZE=${DISK_SIZE}
+      - CACHE_DIR=${CACHE_DIR}
+    ports:
+      - "38003:8003"
+    volumes:
+      - ./data:/root/pipe
+      - ${CACHE_DIR}:/data
+      - node-config:/root/pipe
+
+      # Also mount maybe pipe-manager.sh
+      - ./pipe-manager.sh:/usr/local/bin/pipe-manager.sh
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: "${RAM_SIZE}G"
+        reservations:
+          memory: "${RAM_SIZE}G"
+
+volumes:
+  node-config:

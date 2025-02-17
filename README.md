@@ -1,6 +1,9 @@
-# Pipe Network DevNet Node Installer
+# Pipe Network Node Installer
 
-A **single-run bash script** to quickly install and configure a Pipe DevNet 2 node. This script creates a systemd service named `pipe`, automatically sets up the node binary, and includes a hardcoded referral code for the DevNet phase.
+A **single-run bash script** or **a docker container** to quickly install and configure a Pipe Network Devnet 2 .
+
+This script creates a systemd service named `pipe`, automatically sets up the node binary
+Also you can use docker i would rather go with the docker route actually
 
 ---
 
