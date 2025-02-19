@@ -8,7 +8,9 @@ services:
       - DISK_SIZE=${DISK_SIZE}
       - CACHE_DIR=${CACHE_DIR}
     ports:
-      - "38003:8003"
+      - "${PORT_003}:8003"
+      - "${PORT_80}:80"
+      - "${PORT_443}:443"
     volumes:
       - ./data:/root/pipe
       - ${CACHE_DIR}:/data
