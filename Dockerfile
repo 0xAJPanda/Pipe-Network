@@ -15,8 +15,16 @@ RUN curl -L -o pop "https://dl.pipecdn.app/${POP_VERSION}/pop" \
     && chmod +x pop
 
 # Expose required port
-EXPOSE 8003 
-# docker run -d --name popnode -v $HOME/pipe_data:/app -p 48003:8003 -p 48080:80 -p 48443:443 popnode
-# Set entrypoint
-ENTRYPOINT ["./pop"]
-CMD ["--ram=${RAM_SIZE}", "--pubKey=${SOLANA_WALLET}", "--max-disk=${DISK_SIZE}", "--cache-dir=${CACHE_DIR}"]
+EXPOSE 8003 80 443
+
+# Declare environment variables
+ENV SOLANA_WALLET=${SOLANA_WALLET}
+ENV RAM_SIZE=${RAM_SIZE}
+ENV DISK_SIZE=${DISK_SIZE}
+ENV CACHE_DIR=${CACHE_DIR}
+
+# Create an entrypoint script
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]

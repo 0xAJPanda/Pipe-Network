@@ -15,8 +15,6 @@ services:
       - ./data:/root/pipe
       - ${CACHE_DIR}:/data
       - node-config:/root/pipe
-
-      # Also mount maybe pipe-manager.sh
       - ./pipe-manager.sh:/usr/local/bin/pipe-manager.sh
     restart: unless-stopped
     deploy:
